@@ -1,0 +1,67 @@
+# Arquivo de valores para o Helm Chart kube-prometheus-stack
+
+# Habilita a criação de regras de alerta e gravação padrão. Essencial.
+defaultRules:
+  create: true
+
+# Configurações do Alertmanager (simplificado)
+alertmanager:
+  alertmanagerSpec:
+    # Reduzindo recursos para o ambiente de dev
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
+
+# Configurações do Grafana
+grafana:
+  # Senha de admin. OK para dev, mas use um segredo em produção.
+  adminPassword: "admin"
+  # Habilita dashboards padrão que vêm com o chart
+  defaultDashboardsEnabled: true
+
+# Habilita os exportadores de métricas para os componentes do Control Plane
+kubelet:
+  enabled: true
+kubeScheduler:
+  enabled: true
+kubeControllerManager:
+  enabled: true
+kubeEtcd:
+  enabled: true
+kubeProxy:
+  enabled: true
+
+# Habilita o kube-state-metrics para métricas de estado dos objetos K8s
+kube-state-metrics:
+  enabled: true
+
+# Habilita o node-exporter para métricas de hardware dos nós
+nodeExporter:
+  enabled: true
+
+# Configurações do Prometheus
+prometheus:
+  prometheusSpec:
+    # Aumentando o intervalo de coleta para 15s para reduzir a carga
+    scrapeInterval: "15s"
+    # Mantém os dados por 1 dia. Suficiente para dev.
+    retention: "1d"
+
+    # Reduzindo drasticamente os recursos para nosso cluster Kind local
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 250m
+        memory: 512Mi
+
+    # Estas flags são boas práticas para evitar conflitos, mantivemos elas.
+    ruleSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+    serviceMonitorSelectorNilUsesHelmValues: false
+    probeSelectorNilUsesHelmValues: false

@@ -95,7 +95,7 @@ Antes de começar, garanta que você tenha as seguintes ferramentas instaladas:
     * Importe ou crie os dashboards para visualizar os dados meteorológicos.
 
 ---
-
+```
 ## 📂 Estrutura do Projeto
 
 ├── ansible/                # Contém os playbooks do Ansible
@@ -113,7 +113,7 @@ Antes de começar, garanta que você tenha as seguintes ferramentas instaladas:
 │   └── kind-config.yaml
 ├── ROADMAP.md              # Plano de desenvolvimento do projeto
 └── README.md               # Este arquivo
-
+```
 ---
 
 ## 👤 Autor

@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ingest-api
+  namespace: mysql-cluster
+  labels:
+    app: ingest-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ingest-api
+  template:
+    metadata:
+      labels:
+        app: ingest-api
+    spec:
+      # --- INÍCIO DA SEÇÃO DO INIT CONTAINER ---
+      initContainers:
+      - name: db-initializer
+        # Usamos a MESMA imagem que o contêiner principal
+        image: ingest-api:v1.0 
+        imagePullPolicy: IfNotPresent
+        # O comando aqui é para executar APENAS o script de inicialização
+        command: ["python", "init_db.py"]
+        # Ele precisa das mesmas variáveis de ambiente para se conectar ao banco
+        envFrom:
+        - configMapRef:
+            name: ingest-api-config
+        env:
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mypwds
+              key: rootPassword
+      # --- FIM DA SEÇÃO DO INIT CONTAINER ---
+
+      # A definição do nosso contêiner principal permanece quase a mesma
+      containers:
+      - name: api
+        image: ingest-api:v1.0 # Usando a nova tag da imagem
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 5000
+        envFrom:
+        - configMapRef:
+            name: ingest-api-config
+        env:
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mypwds
+              key: rootPassword

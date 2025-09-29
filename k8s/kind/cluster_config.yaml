@@ -11,6 +11,10 @@ nodes:
   - containerPort: 443
     hostPort: 443
     protocol: TCP
+  - containerPort: 32000
+    hostPort: 32000
+    listenAddress: "0.0.0.0"
+    protocol: TCP
 - role: worker
 - role: worker
 networking:

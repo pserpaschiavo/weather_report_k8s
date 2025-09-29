@@ -6,13 +6,19 @@ logging.basicConfig(level=logging.INFO)
 
 def init_database():
     try:
-        # Conectar ao MySQL sem especificar o banco de dados
-        conn = mysql.connector.connect(
-            host=os.environ.get("DB_HOST", "localhost"),
-            user=os.environ.get("DB_USER", "root"),
-            password=os.environ.get("DB_PASSWORD", ""),
-            port=int(os.environ.get("DB_PORT", "3306"))
-        )
+        # Configuração para conexão ao MySQL sem especificar o banco de dados
+        db_config = {
+            'host': os.environ.get("DB_HOST", "localhost"),
+            'user': os.environ.get("DB_USER", "root"),
+            'password': os.environ.get("DB_PASSWORD", ""),
+            'port': int(os.environ.get("DB_PORT", "3306")),
+        }
+        
+        # Log da tentativa de conexão (sem expor a senha)
+        safe_config = {k: v for k, v in db_config.items() if k != 'password'}
+        logging.info(f"Tentando conectar ao servidor MySQL com configuração: {safe_config}")
+        
+        conn = mysql.connector.connect(**db_config)
         cursor = conn.cursor()
         
         # Verificar se o banco de dados existe, se não, criar

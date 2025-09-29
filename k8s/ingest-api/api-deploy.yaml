@@ -16,14 +16,17 @@ spec:
         app: ingest-api
     spec:
       # --- INÍCIO DA SEÇÃO DO INIT CONTAINER ---
+      # Este contêiner roda uma vez, antes do contêiner principal,
+      # para garantir que o banco e a tabela existam.
       initContainers:
       - name: db-initializer
-        # Usamos a MESMA imagem que o contêiner principal
-        image: ingest-api:v1.0 
+        # Usamos a MESMA imagem que o contêiner principal.
+        # Lembre-se de construir sua imagem com uma tag de versão, ex: ingest-api:v1.1
+        image: ingest-api:v1.1
         imagePullPolicy: IfNotPresent
-        # O comando aqui é para executar APENAS o script de inicialização
+        # O comando aqui é para executar APENAS o script de inicialização.
         command: ["python", "init_db.py"]
-        # Ele precisa das mesmas variáveis de ambiente para se conectar ao banco
+        # Ele precisa das mesmas variáveis de ambiente para se conectar ao banco.
         envFrom:
         - configMapRef:
             name: ingest-api-config
@@ -35,13 +38,15 @@ spec:
               key: rootPassword
       # --- FIM DA SEÇÃO DO INIT CONTAINER ---
 
-      # A definição do nosso contêiner principal permanece quase a mesma
+      # A definição do nosso contêiner principal da aplicação.
       containers:
       - name: api
-        image: ingest-api:v1.0 # Usando a nova tag da imagem
+        # Lembre-se de usar a mesma tag da imagem.
+        image: ingest-api:v1.1
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 5000
+        # Carrega as variáveis de ambiente do ConfigMap e do Secret.
         envFrom:
         - configMapRef:
             name: ingest-api-config

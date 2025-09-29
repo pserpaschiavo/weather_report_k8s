@@ -10,15 +10,15 @@ app = Flask(__name__)
 def get_db_connection():
     try:
         db_port = int(os.environ.get("DB_PORT", "3306"))
+
         conn = mysql.connector.connect(
-            host=os.environ.get("DB_HOST", "localhost"),
-            user=os.environ.get("DB_USER", "root"),
-            password=os.environ.get("DB_PASSWORD", ""),
-            database=os.environ.get("DB_NAME", "mysql"),
+            host=os.environ.get("DB_HOST"),
+            user=os.environ.get("DB_USER"),
+            password=os.environ.get("DB_PASSWORD"),
+            database=os.environ.get("DB_NAME"),
             port=db_port
         )
-
-        logging.info("Conexão como o banco de dados bem-sucedida!")
+        logging.info("Conexão com o banco de dados bem-sucedida!")
         return conn
     except mysql.connector.Error as err:
         logging.error(f"Erro ao conectar ao banco de dados: {err}")
@@ -38,8 +38,7 @@ def healthcheck():
 @app.route('/ingest', methods=['POST'])
 def ingest_data():
     data = request.json
-    ## Placeholder para a lógica da inserção.
-    logging.info(f"Inserção de dados no banco de dados: {data}.")
+    logging.info(f"Recebido dado para ingestão: {data}")
 
     required_keys = ['source', 'temperature', 'humidity', 'pressure']
     if not all(key in data for key in required_keys):
@@ -52,18 +51,18 @@ def ingest_data():
     try:
         cursor = conn.cursor()
         query = ("INSERT INTO leituras (fonte, temperatura, umidade, pressao) "
-                "VALUES (%s, %s, %s, %s)")
+                 "VALUES (%s, %s, %s, %s)")
         values = (data['source'], data['temperature'], data['humidity'], data['pressure'])
         cursor.execute(query, values)
         conn.commit()
         cursor.close()
         logging.info("Dados inseridos com sucesso no banco de dados.")
-        return jsonify({"status": "sucesso"}), 200
+        return jsonify({"status": "sucesso"}), 201
     except mysql.connector.Error as err:
         logging.error(f"Erro ao inserir dados no banco de dados: {err}")
-        return jsonify({"error": "Erro ao inserir dados no banco de dados."}), 500
+        return jsonify({"error": f"Erro ao inserir dados no banco de dados: {err}"}), 500
     finally:
-        if conn.is_connected():
+        if conn and conn.is_connected():
             conn.close()
             logging.info("Conexão com o banco de dados fechada.")
 
